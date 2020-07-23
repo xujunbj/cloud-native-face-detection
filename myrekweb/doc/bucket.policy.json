@@ -1,0 +1,33 @@
+{
+	"Version": "2012-10-17",
+	"Id": "",
+	"Statement": [
+		{
+			"Sid": "getObj",
+			"Effect": "Allow",
+			"Action": "s3:GetObject",
+			"Principal": {
+				"AWS": "*"
+			},
+			"Resource": "arn:aws:s3:::uev-bkt-rek-www/videos/*"
+		},
+		{
+			"Sid": "lstBkt",
+			"Effect": "Allow",
+			"Action": "s3:ListBucket",
+			"Resource": "arn:aws:s3:::uev-bkt-rek-www",
+			"Principal": {
+				"AWS": "*"
+			},
+			"Condition": {
+				"StringLike": {
+					"s3:prefix": [
+						"",
+						"videos/",
+						"videos*"
+					]
+				}
+			}
+		}
+	]
+}

@@ -1,0 +1,28 @@
+{
+    "records": [
+        {
+            "sns": {
+                "messageAttributes": {},
+                "signingCertUrl": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-ac565b8b1a6c5d002d285f9598aa1d9b.pem",
+                "messageId": "942cbe6d-8434-580d-b881-ea22690c2ad0",
+                "message": "{\"JobId\":\"9b135c1455e167f5f4375b78f98dfde4436cf3090819f60efdaa1bbe11b6c006\",\"Status\":\"SUCCEEDED\",\"API\":\"StartFaceDetection\",\"Timestamp\":1540745975375,\"Video\":{\"S3ObjectName\":\"videos/xj_00_w00265ixe1z.321002.1.mp4\",\"S3Bucket\":\"uev-bkt-rek-www\"}}",
+                "unsubscribeUrl": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:948874832909:SNSTpcRek:005a9adf-8785-4a70-80e1-27304b40d8a3",
+                "type": "Notification",
+                "signatureVersion": "1",
+                "signature": "hLjKVWnxFzYzxxbj0eincI1GQqan8H5kpTmdJocdi6jSOLD7rho7/HENjk15YaNjherprzwC94sgVnjNnZKNx46REw2zdpGPfFgNAGR5BqR9FIBDU+FWubO3OGfkwEmOSpkYZenbhRgMwKap/AEx9exrF8E0md9GqqWCCI8RZCwPSI+qwy7sdyW71Ed7q407QIWhWN8yyXMCEvCpYNLW9UFUo55OeMR5/L0S5lFlD/2ibWWJgplPCrEo/BehRky8d7F/wtkuwzoBFeIhhYZC725mjPOAqWYupy1CUNSLGlNWRnOty4rtnax4rvrX7V3yVzGiZ/ZvrGf4ksOs7gEoTg==",
+                "timestamp": {
+                    "iMillis": 1540745976337,
+                    "iChronology": {
+                        "iBase": {
+                            "iMinDaysInFirstWeek": 4
+                        }
+                    }
+                },
+                "topicArn": "arn:aws:sns:us-east-1:948874832909:SNSTpcRek"
+            },
+            "eventVersion": "1.0",
+            "eventSource": "aws:sns",
+            "eventSubscriptionArn": "arn:aws:sns:us-east-1:948874832909:SNSTpcRek:005a9adf-8785-4a70-80e1-27304b40d8a3"
+        }
+    ]
+}

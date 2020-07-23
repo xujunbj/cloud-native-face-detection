@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<title>AWS SA Launch - Team 2</title>
+<link rel="stylesheet" href="https://s3.amazonaws.com/uev-bkt-rek-www/styles/styles.css" type="text/css" media="screen">
+<link rel="stylesheet" href="https://s3.amazonaws.com/uev-bkt-rek-www/styles/loading.css" type="text/css" media="screen">
+<link rel="stylesheet" href="https://s3.amazonaws.com/uev-bkt-rek-www/styles/images.css" type="text/css" media="screen">
+<link rel="shortcut icon" href="https://s3.amazonaws.com/uev-bkt-rek-www/favicon.ico"/>
+<!--
+<link href="https://code.jquery.com/ui/1.12.1/themes/ui-lightness/jquery-ui.css" rel="stylesheet"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.js"></script>
+<script src="https://s3.amazonaws.com/uev-bkt-rek-www/js/jquery-ui.js"></script>
+<script src="https://malsup.github.io/min/jquery.form.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+-->
+<link href="https://s3.amazonaws.com/uev-bkt-rek-www/styles/jquery-ui.css" rel="stylesheet"/>
+<script src="https://s3.amazonaws.com/uev-bkt-rek-www/js/jquery.js"></script>
+<script src="https://s3.amazonaws.com/uev-bkt-rek-www/js/jquery-ui.js"></script>
+<script src="https://s3.amazonaws.com/uev-bkt-rek-www/js/jquery.form.min.js"></script>
+<script src="https://s3.amazonaws.com/uev-bkt-rek-www/js/js.cookie.min.js"></script>
+<script>
+	$(document).ready(function() {
+        // $(":file,:submit,:button").button();
+        // $("select").selectmenu();
+        
+		$("#awsUpload").attr("disabled", true);
+	    $("#awsFile").change(function() {
+	        var fileName = $(this).val();
+	        var extName = fileName.substring(fileName.lastIndexOf(".") + 1);
+	        if(extName.toLowerCase() != "mp4") {
+	        	$(this).val("");
+	        	alert("Invalid file type, you can only upload .mp4 file.");
+	        	return;
+	        }
+	        $("#awsUpload").attr("disabled", false);
+	        
+	        //C:\fakepath\example.mp4
+	        var preLen = ("C:\\fakepath\\").length;
+	        var awsLastFile = fileName.substring(preLen);
+	        Cookies.set("awsLastFile", awsLastFile, { expires: 7 });
+	    });
+	    
+	    $("#awsUpload").click(function() {
+	    	$("#awsUploading").attr("style", "display:inline;");
+	    	// new FormData($("#awsFormUpload"));
+	    });
+	    
+		$('#awsFormUpload').ajaxForm(function() {
+	    	$("#awsUploading").attr("style", "display:none;");
+			$("#awsFile").val("");
+			$("#awsUpload").attr("disabled", true);
+			$.ajax(getVideos);
+        });
+		
+		$.myRekWeb = {
+			retryImage : function(image) {
+				$(image).attr("src", "https://s3.amazonaws.com/uev-bkt-rek-www/images/default.png");
+				var imageURL = $(image).attr("imageurl");
+				var getImage = {
+					type:'GET',
+					url: imageURL,
+					success:function(data, textStatus, jqXHR) {
+						$(image).attr("src", imageURL);
+					},
+					error: function() {
+						setTimeout(() => {$.ajax(getImage);}, 1000);
+					}
+				};
+				$.ajax(getImage);
+			}
+		}
+		
+		var getVideos = {
+			type:'GET',
+			url: 'https://6azzly06bi.execute-api.us-east-1.amazonaws.com/prod/lambda?method=videos',
+			crossDomain: true,
+			contentType: "application/json",
+			dataType: 'json',
+			beforeSend:function(jqXHR, settings) { },
+			success:function(data, textStatus, jqXHR) {
+				console.log("Videos in S3: " + JSON.stringify(data));
+				// Parse the videos.
+				var prefix = "https://s3.amazonaws.com/uev-bkt-rek-www/";
+				var options = "";
+				$.each(data, function (i, n) {
+					var key = data[i].key;
+					var etag = data[i].eTag;
+					if(key.endsWith(".mp4")) {
+						var awsLastFile = Cookies.get("awsLastFile");
+						console.log("awsLastFile: " + awsLastFile);
+						var optText = $.trim(key.substring(7));
+						if(optText.length > 45) {
+							optText = optText.substring(0, 45) + "(...).mp4";
+						}
+						if(("videos/" + awsLastFile) == key) {
+							options += "<option value=\""+ prefix + key +"\" etag='" + etag + "' key=\"" + key + "\"  title=\"" + $.trim(key.substring(7))  + "\" selected>" + optText + "</option>";
+						} else {
+							options += "<option value=\""+ prefix + key +"\" etag='" + etag + "' key=\"" + key + "\"  title=\"" + $.trim(key.substring(7))  + "\">" + optText + "</option>";
+						}
+					}
+				});
+				if($.trim(options) != "") {
+					$("#awsSelVideos").html(options);
+					$("#awsSelVideos").trigger("change");
+				}
+			},
+			error:function(jqXHR, textStatus, errorThrown) {}
+		};
+		
+		$("#awsSelVideos").change(function() {  
+			var option = $(this).children("option:selected").val();
+			var etag = $(this).children("option:selected").attr("etag");
+			var key = $(this).children("option:selected").attr("key");
+			var fileName = key.substring(7);
+	        Cookies.set("awsLastFile", fileName, { expires: 7 });
+			
+			$("#awsVideo").attr("src", option);
+			try {
+				$("#awsVideo").get(0).play();
+			} catch(e) {
+				console(e);
+			}
+			
+			var getImages = {
+				type:'GET',
+				url: 'https://6azzly06bi.execute-api.us-east-1.amazonaws.com/prod/lambda?method=faces&etag=' + etag,
+				crossDomain: true,
+				contentType: "application/json",
+				dataType: 'json',
+				beforeSend:function(jqXHR, settings) {},
+				success:function(data, textStatus, jqXHR) {
+					console.log("Faces detected by Amazon Rekoginition: " + JSON.stringify(data));
+					// Parse the faces.
+					var prefix = "https://s3.amazonaws.com/uev-bkt-rek-www/videos/" + etag + "/cropped/";
+					var imagesHTML = "";
+					var durationMillis = 0;
+					for(var result of data) {
+						// IN_PROGRESS | SUCCEEDED | FAILED
+						var jobStatus = result.jobStatus;
+						console.log("jobStatus: " + jobStatus + " at " + Date.now() + "ms.");
+						$("#awsJobStatus").html("");
+						if (jobStatus == "FAILED") {
+							$("#awsJobStatus").html("Job status: failed.");
+							break;
+						} else if (jobStatus == "IN_PROGRESS") {
+							var info = "<img src='https://s3.amazonaws.com/uev-bkt-rek-www/images/loading.gif' class='awsLoading'/>";
+							info += "&nbsp;Recognition is in progress. Please stay tuned.";
+							$("#awsJobStatus").html(info);
+							// Inline function expression.
+							setTimeout(() => {$.ajax(getImages);}, 5000);
+							break;
+						} else if (jobStatus == "SUCCEEDED") {
+							var videoMetadata = result.videoMetadata;
+							durationMillis = videoMetadata.durationMillis;
+							var faces = result.faces;
+							// console.log("durationMillis: " + durationMillis);
+							for(var face of faces) {
+								var timestamp = face.timestamp + "";
+								timestamp = timestamp.length == 1 ? "00" + timestamp : timestamp;
+								timestamp = timestamp.length == 2 ? "0" + timestamp : timestamp;
+								var imageURL = prefix + timestamp + ".jpg";
+								imagesHTML += "<li>";
+								imagesHTML += "<div class='awsImageContainer' style='border: solid 1px #D3D3D3'>";
+								imagesHTML += "<img class='awsImage' src='" + imageURL + "' style='width:100%; height:100%;' timestamp='" + timestamp + "' onerror='$.myRekWeb.retryImage(this);' imageurl='" + imageURL + "'/>";
+								imagesHTML += "</div>";
+								imagesHTML += "</li>";
+							}
+						}
+					}
+					imagesHTML = (imagesHTML == "") ? "<li><div style='width:110px; height:110px;'>&nbsp;</div></li>" : imagesHTML;
+					$("#awsImages").html(imagesHTML);
+					
+					$(".awsImage").mouseover(function() {
+						$(this).parent().attr("style", "border: solid 1px #ff9900");
+						var checked = $("#awsShowTimeStamp").prop("checked");
+						if(checked) {
+							var info = "The video's length is " + durationMillis + "ms, the selected image's timestamp: " + $(this).attr("timestamp") + "ms.";
+							$("#awsImageInfo").html(info);
+						}
+					});
+					$(".awsImage").mouseout(function() {
+						$(this).parent().attr("style", "border: solid 1px #D3D3D3");
+						var checked = $("#awsShowTimeStamp").prop("checked");
+						if(checked) {
+							var info = "The video's length is " + durationMillis + "ms.";
+							$("#awsImageInfo").html(info);
+						}
+					});
+					$(".awsImage").click(function() {
+						var timestamp = $(this).attr("timestamp");
+						var currentTime = Math.floor(timestamp / 1000);
+						$("#awsVideo").get(0).pause();
+						$("#awsVideo").get(0).currentTime = currentTime;
+					});
+				},
+				error:function(jqXHR, textStatus, errorThrown) {}
+			};
+			$.ajax(getImages);
+		});
+		
+		$.ajax(getVideos);
+		
+		$("#awsShowTimeStamp").change(function() {
+			var checked = $("#awsShowTimeStamp").prop("checked");
+			if(checked) {
+				$("#awsImageInfo").show();
+			} else {
+				$("#awsImageInfo").hide();
+			}
+		});
+	});
+</script>
+</head>
+<body>
+	<div id="content" class="container">
+
+		<div style="height: 10px;"></div>
+
+		<h3>AWS SA Launch - Team 2</h3>
+		<p>The demo illustrates identifying people’s faces in short videos based on Amazon S3, Lambda, API Gateway, Rekognition, DynamoDB, SNS and CloudWatch.</p>
+
+		<h4>Contents of this Demo</h4>
+
+		<p>
+			The work flow chart of this demo is located <a href="https://s3.amazonaws.com/uev-bkt-rek-www/images/rek.svg" target="_blank">here</a>. A set of short videos have been uploaded to Amazon S3, and relevant metadata have been retrieved and persisted in Amazon DynamoDB. The uploaded videos have also been recognized by Amazon Rekognition. Based on the recognition result, the frames containing detected faces and cropped images have been archived into Amazon S3. In this web page, by switching to different short videos from the drop-down list menu, the selected video can be seen playing in the video player, and relevant detected faces arranged in timestamp sequence are listed below the video player window. By clicking anyone of the detected faces, the video will pause and seek to relevant position. If the check box of "Show timestamp" is checked, the detected face's timestamp in the short video will be shown. 
+		</p>
+			
+		<p>
+			You can also upload your own short videos for further validation. <b>Uploading</b> your video file, and <b>waiting</b> for a few seconds or even a couple of minutes, and finally you will see the recognition result automatically presented in this web page.
+		</p>
+  
+		<p style="text-align:center;">
+			<video id="awsVideo" width="600px" controls autoplay loop muted></video>
+		</p>
+		
+		<p style="text-align:center;">
+			<ul id="awsImages" class="images" style="list-style:none;"><li><div style="width:110px; height:110px;">&nbsp;</div></li></ul>
+			<label>Recommend using Chrome or Safari browser, and the horizontal scrollbar for images will display with a mouse plugged in when you're on MAC platforms.</label><br/>
+			<input id="awsShowTimeStamp" type="checkbox" checked/><label>Show video length and image timestamp (Unit: ms).&nbsp;&nbsp;</label><label id="awsImageInfo">&nbsp;</label>
+		</p>
+		
+		<form id="awsFormUpload" action="https://uev-bkt-rek-www.s3.amazonaws.com/" method="post" enctype="multipart/form-data">
+			 <!-- Key to upload:  -->
+			<input type="hidden" name="key" value="videos/${filename}" />
+			<input type="hidden" name="acl" value="public-read" />
+			<input type="hidden" name="success_action_redirect" value="https://s3.amazonaws.com/uev-bkt-rek-www/index.html" />
+			<!-- Content-Type:  -->
+			<input type="hidden" name="Content-Type" value="video/mp4" />
+			<input type="hidden" name="x-amz-meta-uuid" value="14365123651274" /> 
+			<input type="hidden" name="x-amz-server-side-encryption" value="AES256" /> 
+			<input type="hidden" name="x-amz-credential" value="XXX/20200601/us-east-1/s3/aws4_request" />
+			<input type="hidden" name="x-amz-algorithm" value="AWS4-HMAC-SHA256" />
+			<input type="hidden" name="x-amz-date" value="20200601T000000Z" />
+			<!-- Tags for File:  -->
+			<input type="hidden" name="x-amz-meta-tag" value="" /><br />
+			<input type="hidden" name="policy" value="eyAiZXhwaXJhdGlvbiI6ICIyMDIwLTA2LTAxVDEyOjAwOjAwLjAwMFoiLAogICJjb25kaXRpb25zIjogWwogICAgeyJidWNrZXQiOiAidWV2LWJrdC1yZWstd3d3In0sCiAgICBbInN0YXJ0cy13aXRoIiwgIiRrZXkiLCAidmlkZW9zLyJdLAogICAgeyJhY2wiOiAicHVibGljLXJlYWQifSwKICAgIHsic3VjY2Vzc19hY3Rpb25fcmVkaXJlY3QiOiAiaHR0cHM6Ly9zMy5hbWF6b25hd3MuY29tL3Vldi1ia3QtcmVrLXd3dy9pbmRleC5odG1sIn0sCiAgICBbInN0YXJ0cy13aXRoIiwgIiRDb250ZW50LVR5cGUiLCAidmlkZW8vIl0sCiAgICB7IngtYW16LW1ldGEtdXVpZCI6ICIxNDM2NTEyMzY1MTI3NCJ9LAogICAgeyJ4LWFtei1zZXJ2ZXItc2lkZS1lbmNyeXB0aW9uIjogIkFFUzI1NiJ9LAogICAgWyJzdGFydHMtd2l0aCIsICIkeC1hbXotbWV0YS10YWciLCAiIl0sCiAgICB7IngtYW16LWNyZWRlbnRpYWwiOiAiQUtJQTVaM0tZNVFHVk5CWDJLUFAvMjAyMDA2MDEvdXMtZWFzdC0xL3MzL2F3czRfcmVxdWVzdCJ9LAogICAgeyJ4LWFtei1hbGdvcml0aG0iOiAiQVdTNC1ITUFDLVNIQTI1NiJ9LAogICAgeyJ4LWFtei1kYXRlIjogIjIwMjAwNjAxVDAwMDAwMFoiIH0KICBdCn0=" />
+			<input type="hidden" name="x-amz-signature" value="55a5a38b1999d51d63639f9c5e66d1b43e2c1dd7042a76aface5950dceae5c23" />
+			<!-- File:  -->
+			<label>You can upload a .mp4 file for face detection.</label>
+			<input id="awsFile" type="file" name="file" style="border:solid #D3D3D3 1px; border-radius:3px;"/>
+			<!-- The elements after this will be ignored -->
+			<input id="awsUpload" type="submit" name="submit" value="Upload File" />&nbsp;&nbsp;<label id="awsUploading" style="display:none;"><img src="https://s3.amazonaws.com/uev-bkt-rek-www/images/loading.gif" class="awsLoading"/>&nbsp;Uploading the video file to Amazon S3.</label>
+		</form>
+		
+		<br/>
+		<label>The .mp4 files you have uploaded to Amazon S3:&nbsp;&nbsp;</label><select id="awsSelVideos" style="min-width:320px;"></select>&nbsp;&nbsp;<label id="awsJobStatus"></label>
+
+		<h3>Technical Support</h3>
+		<p>
+			Should you have any questions, please mail to xujunaws@amazon.com. For more information about working with AWS, refer to the <a href="https://docs.aws.amazon.com/"> AWS Developer Guide</a>.
+		</p>
+	</div>
+</body>
+</html>

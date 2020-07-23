@@ -1,0 +1,15 @@
+{ "expiration": "2020-06-01T12:00:00.000Z",
+  "conditions": [
+    {"bucket": "uev-bkt-rek-www"},
+    ["starts-with", "$key", "videos/"],
+    {"acl": "public-read"},
+    {"success_action_redirect": "https://s3.amazonaws.com/uev-bkt-rek-www/index.html"},
+    ["starts-with", "$Content-Type", "video/"],
+    {"x-amz-meta-uuid": "14365123651274"},
+    {"x-amz-server-side-encryption": "AES256"},
+    ["starts-with", "$x-amz-meta-tag", ""],
+    {"x-amz-credential": "X/20200601/us-east-1/s3/aws4_request"},
+    {"x-amz-algorithm": "AWS4-HMAC-SHA256"},
+    {"x-amz-date": "20200601T000000Z" }
+  ]
+}

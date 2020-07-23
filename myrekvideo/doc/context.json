@@ -1,0 +1,14 @@
+{
+    "memoryLimit": 512,
+    "awsRequestId": "5f0e5be4-d806-11e8-98ce-97410582e838",
+    "logGroupName": "/aws/lambda/myRekVideoSNSHandler",
+    "logStreamName": "2018/10/25/[$LATEST]3ec7c06bc1b842698afd40db31c8a421",
+    "functionName": "myRekVideoSNSHandler",
+    "functionVersion": "$LATEST",
+    "invokedFunctionArn": "arn:aws:lambda:us-east-1:948874832909:function:myRekVideoSNSHandler",
+    "cognitoIdentity": {
+        "identityId": "",
+        "poolId": ""
+    },
+    "logger": {}
+}

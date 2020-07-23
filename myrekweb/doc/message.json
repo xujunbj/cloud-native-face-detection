@@ -1,0 +1,10 @@
+{
+	"JobId": "67b3763f0a55b144e245ba448213f44991955b791d3396dd7fc645b26b3521f2",
+	"Status": "SUCCEEDED",
+	"API": "StartFaceDetection",
+	"Timestamp": 1558679848439,
+	"Video": {
+		"S3ObjectName": "videos/The Actress - SNL.mp4",
+		"S3Bucket": "uev-bkt-rek-www"
+	}
+}

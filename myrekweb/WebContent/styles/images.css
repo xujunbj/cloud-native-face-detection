@@ -1,0 +1,24 @@
+@charset "UTF-8";
+ul.images {
+  margin: 0;
+  padding: 1px;
+  display: flex;
+  flex-direction: row;
+  width: 940px;
+  overflow-x: auto;
+  border:solid #D3D3D3 1px; 
+  border-radius:3px;
+  text-align: center;
+}
+
+ul.images li {
+  flex: 0 0 auto;
+  width: 120px;
+  height: 120px;
+}
+
+div.awsImageContainer {
+	border: solid 1px #D3D3D3;
+	width: 110px;
+	height: 110px;
+}

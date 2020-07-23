@@ -1,0 +1,24 @@
+{
+    "Version": "2008-10-17",
+    "Id": "",
+    "Statement": [
+        {
+            "Sid": "getObj",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "*"
+            },
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::uev-bkt-rek-www/videos/*"
+        },
+        {
+            "Sid": "lstBkt",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "*"
+            },
+            "Action": "s3:ListBucket",
+            "Resource": "arn:aws:s3:::uev-bkt-rek-www"
+        }
+    ]
+}
